@@ -47,8 +47,11 @@ public class main extends javax.swing.JFrame {
         GenerateArchive = new javax.swing.JButton();
         jScrollPane3 = new javax.swing.JScrollPane();
         exitTXT = new javax.swing.JTextArea();
+        timeElapse = new javax.swing.JLabel();
+        jLabel1 = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setTitle("Pepsi Route Planner");
 
         ReadEntry.setText("Read Entry");
         ReadEntry.addMouseListener(new java.awt.event.MouseAdapter() {
@@ -83,27 +86,37 @@ public class main extends javax.swing.JFrame {
         exitTXT.setRows(5);
         jScrollPane3.setViewportView(exitTXT);
 
+        timeElapse.setFont(new java.awt.Font("Tahoma", 1, 11)); // NOI18N
+        timeElapse.setText("0.0");
+
+        jLabel1.setText("nanoseconds");
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(ReadEntry)
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 193, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(32, 32, 32)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
-                        .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 259, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(43, 43, 43)
-                        .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 271, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addContainerGap(21, Short.MAX_VALUE))
+                        .addGap(54, 54, 54)
+                        .addComponent(ReadEntry))
+                    .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 211, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(41, 41, 41)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 243, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(32, 32, 32)
+                        .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 270, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addContainerGap(32, Short.MAX_VALUE))
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(CalculateButton)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(timeElapse)
+                        .addGap(18, 18, 18)
+                        .addComponent(jLabel1)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addComponent(GenerateArchive)
-                        .addGap(73, 73, 73))))
+                        .addGap(90, 90, 90))))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -117,7 +130,9 @@ public class main extends javax.swing.JFrame {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(ReadEntry)
                     .addComponent(CalculateButton)
-                    .addComponent(GenerateArchive))
+                    .addComponent(GenerateArchive)
+                    .addComponent(timeElapse)
+                    .addComponent(jLabel1))
                 .addContainerGap())
         );
 
@@ -185,6 +200,7 @@ public class main extends javax.swing.JFrame {
 
     private void CalculateButtonMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_CalculateButtonMouseClicked
         // TODO add your handling code here:
+        long startTime = System.nanoTime();
         ArrayList<Store> Distances = new ArrayList();//array de las distances de cada store
         for (int i = 1; i < stores.size(); i++) {
             Store currentStore = stores.get(i);
@@ -208,7 +224,7 @@ public class main extends javax.swing.JFrame {
             ArrayList<Store> route = new ArrayList();
             routesTXT.append("Ruta " + (i + 1) + ": ");
             double granTotal = 0;
-            for (int j = 0; j < Distances.size(); j++) {
+            for (int j = 0; j <= Distances.size()-1; j++) {
                 if (j + i < Distances.size() && j % PepsiCamiones == 0) {
                     Store currentStore = Distances.get(i + j);
                     route.add(currentStore);
@@ -221,8 +237,9 @@ public class main extends javax.swing.JFrame {
             }
             routesTXT.append("\nDistancia Total: " + granTotal + "\n\n");
             routes.add(route);
-
         }
+        long estimatedTime = System.nanoTime() - startTime;
+        timeElapse.setText(Long.toString(estimatedTime));
 
     }//GEN-LAST:event_CalculateButtonMouseClicked
 
@@ -301,10 +318,12 @@ public class main extends javax.swing.JFrame {
     private javax.swing.JButton ReadEntry;
     private javax.swing.JTextArea ReadTxtEntry;
     private javax.swing.JTextArea exitTXT;
+    private javax.swing.JLabel jLabel1;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JScrollPane jScrollPane3;
     private javax.swing.JTextArea routesTXT;
+    private javax.swing.JLabel timeElapse;
     // End of variables declaration//GEN-END:variables
     File currentFile;
     int PepsiCamiones;
