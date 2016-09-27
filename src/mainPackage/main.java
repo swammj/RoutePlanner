@@ -146,29 +146,29 @@ public class main extends javax.swing.JFrame {
             fileChoosed.setCurrentDirectory(new File("./"));
             int valid = fileChoosed.showOpenDialog(this);
             if (valid == JFileChooser.APPROVE_OPTION) {
-                coordinates = new ArrayList();
+                coordinates = new ArrayList();//se crea un array de coordenadas
                 currentFile = fileChoosed.getSelectedFile();
                 FileReader fileRead = new FileReader(currentFile);
                 BufferedReader bufferRead = new BufferedReader(fileRead);
                 ReadTxtEntry.setText("");
                 String line;
                 int index = 1;
-                while ((line = bufferRead.readLine()) != null) {
+                while ((line = bufferRead.readLine()) != null) {//mientras hayas datos en el archivo
                     int store = index - 2;
-                    switch (index) {
+                    switch (index) {//es el numero de caminiones
                         case 1:
                             PepsiCamiones = Integer.parseInt(line);//numero de camiones
                             break;
-                        case 2: {
+                        case 2: {//el punto de partida
                             String[] Split = line.split(",");
                             int x = Integer.parseInt(Split[0]);
                             int y = Integer.parseInt(Split[1]);
-                            XYCoordinates OriginCoordinate = new XYCoordinates(x, y);
-                            origin = new Store("0", OriginCoordinate);// punto de partida
-                            coordinates.add(OriginCoordinate);//se agreaga al array de coordinadas                        
+                            XYCoordinates setPointCoordinates = new XYCoordinates(x, y);
+                            setPoint = new Store("0", setPointCoordinates);// punto de partida
+                            coordinates.add(setPointCoordinates);//se agreaga al array de coordinadas                        
                             break;
                         }
-                        default: {
+                        default: {//las demas tiendas se agregar al array de coordenadas
                             String[] split = line.split(",");
                             int x = Integer.parseInt(split[0]);
                             int y = Integer.parseInt(split[1]);
@@ -203,13 +203,13 @@ public class main extends javax.swing.JFrame {
         long startTime = System.nanoTime();
         ArrayList<Store> Distances = new ArrayList();//array de las distances de cada store
         for (int i = 1; i < stores.size(); i++) {
-            Store currentStore = stores.get(i);
-            Double distance = getDistance(currentStore.position, origin.position);
+            Store currentStore = stores.get(i);           //formula de distancia 
+            Double distance = Math.sqrt(Math.pow(currentStore.position.x - setPoint.position.x, 2) + Math.pow(currentStore.position.y - setPoint.position.y, 2));
             currentStore.distance = distance;
             Distances.add(currentStore);
         }
  
-        for (int i = Distances.size() - 1; i >= 0; i--) {//
+        for (int i = Distances.size() - 1; i >= 0; i--) {//Bubble sort para ordenar las distancias
             for (int j = 0; j < i; j++) {
                 if (Distances.get(j + 1).distance < Distances.get(j).distance) {// se van generando las distancias de menos a mayor.
                     Store temp = Distances.get(j + 1);
@@ -218,22 +218,23 @@ public class main extends javax.swing.JFrame {
                 }
             }
         }
+        
+        routesTXT.setText("");         
         routes = new ArrayList();
-        routesTXT.setText("");        
-        for (int i = 0; i < PepsiCamiones; i++) {
+        for (int i = 0; i < PepsiCamiones; i++) {//por cada camion asignar rutas
             ArrayList<Store> route = new ArrayList();
             routesTXT.append("Ruta " + (i + 1) + ": ");
             double granTotal = 0;
             for (int j = 0; j <= Distances.size()-1; j++) {
-                if (j + i < Distances.size() && j % PepsiCamiones == 0) {
+                if (j + i < Distances.size() && j % PepsiCamiones == 0) {//condicion para equilibrar la distribucion de camiones
                     Store currentStore = Distances.get(i + j);
                     route.add(currentStore);
-                    granTotal += currentStore.distance;
+                    granTotal += currentStore.distance;//sumatori de las distancias en la ruta
                 }
             }
             if (route.size() > 0) { //despues del recorrido tiene que llegar al origen.
                 granTotal += route.get(route.size() - 1).distance;
-                route.add(origin);
+                route.add(setPoint);
             }
             routesTXT.append("\nDistancia Total: " + granTotal + "\n\n");
             routes.add(route);
@@ -245,37 +246,34 @@ public class main extends javax.swing.JFrame {
 
     private void GenerateArchiveMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_GenerateArchiveMouseClicked
         // TODO add your handling code here:
-        try {
-            String content = "";
-            File file = new File("./salida.txt");
+        try {           
+            File file = new File("./salida.txt");//se fija el archivo de salida
             exitTXT.setText("");
             file.createNewFile();
             FileWriter fileWriter = new FileWriter(file.getAbsoluteFile());
+            String content = "";
             try (BufferedWriter bufferWriter = new BufferedWriter(fileWriter)) {
-                for (int i = 0; i < routes.size(); i++) {
+                for (int i = 0; i < routes.size(); i++) {//se recorren las rutas para que las tiendas
                     ArrayList<Store> route = routes.get(i);
                     exitTXT.append(route.size() + "\n");
-                    content += route.size();
-                    for (int j = 0; j < route.size(); j++) {
+                    content += route.size();//numero de tiendas en la ruta
+                    for (int j = 0; j < route.size(); j++) {//las tiendas que estan es la ruta
                         Store currentStore = route.get(j);
                         exitTXT.append(currentStore.index + " ");
                         content += currentStore.index;
                     }
                     exitTXT.append("\n");
                 }
-                bufferWriter.write(content);
+                bufferWriter.write(content);//se escribe en el archivo
                 bufferWriter.flush();
+                bufferWriter.close();
             }
             JOptionPane.showMessageDialog(this, "¡El archivo fue generado con éxito!", "Aviso", JOptionPane.INFORMATION_MESSAGE);
 
         } catch (IOException e) {
         }
-
     }//GEN-LAST:event_GenerateArchiveMouseClicked
 
-    public Double getDistance(XYCoordinates start, XYCoordinates end) {//se calcula la distancia entre las coordenadas
-        return Math.sqrt(Math.pow(start.x - end.x, 2) + Math.pow(start.y - end.y, 2));
-    }
 
     /**
      * @param args the command line arguments
@@ -325,10 +323,12 @@ public class main extends javax.swing.JFrame {
     private javax.swing.JTextArea routesTXT;
     private javax.swing.JLabel timeElapse;
     // End of variables declaration//GEN-END:variables
-    File currentFile;
-    int PepsiCamiones;
-    Store origin;
-    ArrayList<XYCoordinates> coordinates;
-    ArrayList<Store> stores;
-    ArrayList<ArrayList<Store>> routes;
+    private File currentFile;
+    private int PepsiCamiones;
+    private Store setPoint;    
+    private ArrayList<ArrayList<Store>> routes;
+    private ArrayList<Store> stores;
+    private ArrayList<XYCoordinates> coordinates;
+    
+    
 }
